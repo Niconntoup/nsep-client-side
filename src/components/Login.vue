@@ -34,7 +34,7 @@
 
 <script>
 import CryptoJS from 'crypto-js';
-import { ElNotification } from 'element-plus';
+import { colProps, ElNotification } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
 
 export default {
@@ -77,7 +77,7 @@ export default {
             this.password = '';
         },
         findUser() {
-            if (!this.Info.userInfo.name || !this.password) {
+            if (!this.username || !this.password) {
                 ElNotification({
                     title: '警告',
                     message: '账号或密码不能为空',
@@ -87,8 +87,9 @@ export default {
             }
             this.loginerUser(true); // Pass a flag to indicate it's a login attempt
         },
+
         loginerUser(isLoginAttempt = false) {
-            if (!this.Info.userInfo.name || !this.password) {
+            if (!this.username || !this.password) {
                 ElNotification({
                     title: '警告',
                     message: '账号和密码不能为空',
@@ -105,10 +106,15 @@ export default {
                 duration: 1500,
             });
 
-            this.$http.post("/login/", { username: this.username, password: this.hashPassword })
+            this.$http.post(`/http/${isLoginAttempt ? 'login' : 'register/user'}/`, { username: this.username, password: this.hashPassword })
                 .then((response) => {
+                    let httpStatus = response.status;
                     response = response.data;
-                    if (response.state == 200 && response.token) { // 登录成功，并且返回了 token
+
+                    console.log("response.token:" + response.token);
+                    console.log("httpStatus:" + httpStatus);
+
+                    if (httpStatus == 200 && response.token) { // 登录成功，并且返回了 token
                         ElNotification({
                             title: '成功',
                             message: '登录成功',
@@ -124,17 +130,10 @@ export default {
 
                         // (保留) 将用户信息更新到 Vuex store
                         this.$store.commit('updateUserInfo', response);
-
+                        console.log("list:" + this.$store.state.userInfo.likes_pdf_id);
                         // 3. 跳转到主页
                         this.$router.push('/main');
 
-                    } else if (response.state == 401) { // Password error
-                        ElNotification({
-                            title: '错误',
-                            message: '账号或密码错误',
-                            type: 'error',
-                            duration: 2000,
-                        })
                     } else {
                         ElNotification({
                             title: '错误',

@@ -51,5 +51,7 @@ body {
   /* 60px for header + 20px for spacing */
   background-color: #f0f2f5;
   /* Apply background color here */
+  overflow: hidden;
+  /* Prevent scrolling on the content area itself */
 }
 </style>

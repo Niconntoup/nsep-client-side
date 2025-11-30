@@ -46,16 +46,40 @@
 
             <!-- Right Column (Scrollable) -->
             <div class="right-column">
-                <el-card class="paper-card">
+                <el-card class="paper-card content-list-container">
                     <template #header>
                         <div class="card-header">
-                            <span>你的主内容区</span>
+                            <span>所收藏的PDFs</span>
                         </div>
                     </template>
                     <div class="main-content">
-                        <h1>欢迎来到你的创作空间</h1>
-                        <p>这里是你可以自由编辑和滚动的内容区域。</p>
-                        <p v-for="i in 50" :key="i">这是第 {{ i }} 行内容，用于演示滚动效果...</p>
+                        <el-table :data="tableData" stripe @cell-click="handelTableCellClick" style="width: 100%">
+                            <el-table-column prop="file_name" label="PDF" sortable />
+                            <el-table-column prop="course_name" label="Course" sortable />
+                            <el-table-column prop="upload_time" label="Upload Time" sortable />
+                            <el-table-column prop="likes" label="Likes" sortable />
+                            <el-table-column prop="state" label="State" sortable>
+                                <template #default="scope">
+                                    <el-popover effect="light" trigger="hover" placement="top" width="auto">
+                                        <template #default>
+                                            <div>{{ scope.row.state == 'approved' ? '已审核' : '未审核或不通过' }}</div>
+                                        </template>
+                                        <template #reference>
+                                            <el-tag :type="scope.row.state == 'approved' ? 'success' : 'info'">{{
+                                                scope.row.state }}</el-tag>
+                                        </template>
+                                    </el-popover>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Operation">
+                                <template #default="scope">
+                                    <el-button size="small" type="danger" :disabled="isTableError"
+                                        @click="handleDelete(scope.$index, scope.row)">
+                                        取消收藏
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
                     </div>
                 </el-card>
             </div>
@@ -74,7 +98,37 @@ export default {
     },
     data() {
         return {
+            isTableError: false,
+            tableData: [
+                {
+                    pdf_id: "1",
+                    uploader_id: "12323",
+                    file_name: "TEST",
+                    description: "描述 1",
+                    course_name: "jed101",
+                    file_size: 0,
+                    likes: 0,
+                    upload_time: "2024-06-01 12:00:00",
+                    file_path: "./sda",
+                    state: "approved"
+                },
+            ],
+            errorTableData: [
+                {
+                    pdf_id: "__ERROR__",
+                    uploader_id: "12323",
+                    file_name: "ERROR",
+                    description: "描述 1",
+                    course_name: "jed101",
+                    file_size: 0,
+                    likes: 0,
+                    upload_time: "2024-06-01 12:00:00",
+                    file_path: "./sda",
+                    state: "approved"
+                },
+            ],
             searchQuery: '',
+            likes_pdf: [],
             hotAuthors: [
                 { id: 1, rank: 1, name: '作家A' },
                 { id: 2, rank: 2, name: '作家B' },
@@ -97,10 +151,41 @@ export default {
         }
     },
     created() {
-        this.$http.get("/api/wordcloud-pdfnames/")
+        // 请求用户收藏的PDFs
+        this.$http.post("/http/api/user/like-pdfs/", { "likes_pdf_id": this.$store.state.userInfo.likes_pdf_id })
             .then((response) => {
+                let httpStatus = response.status;
                 response = response.data;
-                if (response.state == 200) {
+                if (httpStatus == 200) {
+                    this.likes_pdf = response.likes_pdf;
+                    this.isTableError = false;
+                } else {
+                    ElNotification({
+                        title: '错误',
+                        message: response.message || '发生未知错误',
+                        type: 'error',
+                        duration: 2000,
+                    })
+                    this.isTableError = true;
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+                ElNotification({
+                    title: '网络错误',
+                    message: '获取收藏PDF失败',
+                    type: 'error',
+                    duration: 2000,
+                })
+                this.isTableError = true;
+            });
+
+        // 请求词云数据
+        this.$http.get("/http/api/wordcloud-pdfnames/")
+            .then((response) => {
+                let httpStatus = response.status;
+                response = response.data;
+                if (httpStatus == 200) {
                     this.$store.commit('updateWordCloudPdfnames', response.pdf_top_words);
                 } else {
                     ElNotification({
@@ -124,6 +209,46 @@ export default {
             })
     },
     methods: {
+        handelTableCellClick(row, column, cell, event) {
+            if (column.property === 'file_name') {
+                const pdfId = row.pdf_id;
+                // TODO:  设计请求跳转到 PDF 详情页
+                this.$router.push({ name: 'PdfViewPage', query: { pdfId: row.pdf_id } });
+            }
+        },
+        handleDelete(index, row) {
+            this.tableData.splice(index, 1);
+            // 请求数据库删除用户收藏
+            this.$http.post("/http/api/user/delete/like-pdf/", { "delete_like_pdf_id": row.pdf_id })
+                .then((response) => {
+
+                    let httpStatus = response.status;
+                    response = response.data;
+
+                    if (httpStatus == 200) {
+                        this.tableData.splice(index, 1); // 从表格数据中移除该行
+                    } else {
+                        ElNotification({
+                            title: '错误',
+                            message: response.message || '发生未知错误',
+                            type: 'error',
+                            duration: 2000,
+                        })
+
+                        this.tableData = this.errorTableData;
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                    ElNotification({
+                        title: '网络错误',
+                        message: '词云请求失败',
+                        type: 'error',
+                        duration: 2000,
+                    })
+                    this.tableData = this.errorTableData;
+                })
+        },
         performSearch() {
             if (!this.searchQuery.trim()) {
                 console.log('Search query is empty');
@@ -138,6 +263,13 @@ export default {
 <style scoped>
 .main-page-container {
     padding-bottom: 20px;
+}
+
+.content-list-container {
+    max-width: 1200px;
+    /* Set a max width for better readability */
+    margin: 0 auto;
+    /* Center the container within the right column */
 }
 
 .page-content-wrapper {
@@ -179,9 +311,32 @@ export default {
     border: 1px solid #e8e8e8;
 }
 
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .card-header {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.card-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.course-title {
     font-size: 18px;
     font-weight: bold;
+    color: #303133;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
 }
 
 .hot-list-card ul {

@@ -30,6 +30,7 @@ const store = createStore({
                 username: "",
                 create_time: "",
                 permission: "",
+                likes_pdf_id: [],
                 token: ""
             },
             wordCloudPdfnames: []
@@ -64,7 +65,7 @@ const store = createStore({
 const app = createApp(App);
 
 // 配置 axios
-axios.defaults.baseURL = "http://localhost:8087";
+// axios.defaults.baseURL = "http://127.0.0.1:5000"; // <--- 注释或删除此行
 
 // 将 axios 挂载到 Vue 3 的全局属性
 app.config.globalProperties.$http = axios;

@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 const routes = [
     {
         path: '/',
-        redirect: '/main'
+        redirect: '/login'
     },
     {
         path: '/login',
@@ -20,6 +20,12 @@ const routes = [
         path: '/profile',
         name: 'ProfilePage',
         component: () => import('@/components/ProfilePage.vue')
+    },
+    {
+        // 有query参数{pdfId: 'xxx'}，用于获取PDF详情
+        path: '/pdf/view',
+        name: 'PdfViewPage',
+        component: () => import('@/components/PdfViewPage.vue')
     },
 ];
 
