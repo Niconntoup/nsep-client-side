@@ -11,55 +11,55 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import createPersistedState from 'vuex-persistedstate';
 import "@/assets/global.css";
 import _ from 'lodash';
-import { update } from "lodash";
+import store from "./store";
 
-// 创建一个新的 store 实例
-const store = createStore({
-    state() {
-        return {
-            currentInfo: {
-                state: 200,
-                userInfo: {
-                    name: "",
-                    blogNums: 0,
-                    views: 0
-                }
-            },
-            userInfo: {
-                user_id: "",
-                username: "",
-                create_time: "",
-                permission: "",
-                likes_pdf_id: [],
-                token: ""
-            },
-            wordCloudPdfnames: []
-        }
-    },
-    mutations: {
-        updateUserInfo(state, userInfo) {
-            state.userInfo = _.cloneDeep(userInfo);
-        },
-        updateWordCloudPdfnames(state, pdfnames) {
-            state.wordCloudPdfnames = pdfnames;
-        },
+// // 创建一个新的 store 实例
+// const store = createStore({
+//     state() {
+//         return {
+//             currentInfo: {
+//                 state: 200,
+//                 userInfo: {
+//                     name: "",
+//                     blogNums: 0,
+//                     views: 0
+//                 }
+//             },
+//             userInfo: {
+//                 user_id: "",
+//                 username: "",
+//                 create_time: "",
+//                 permission: "",
+//                 likes_pdf_id: [],
+//                 token: ""
+//             },
+//             wordCloudPdfnames: []
+//         }
+//     },
+//     mutations: {
+//         updateUserInfo(state, userInfo) {
+//             state.userInfo = _.cloneDeep(userInfo);
+//         },
+//         updateWordCloudPdfnames(state, pdfnames) {
+//             state.wordCloudPdfnames = pdfnames;
+//         },
 
-        removeBlogByBlogId(state, id) {
-            const index = state.Info.blogs.findIndex(blog => blog.id === id);
-            if (index !== -1) {
-                state.Info.blogs.splice(index, 1);  // 删除该元素
-            }
-            state.Info.userInfo.blogNums -= 1;
-            state.Info.userInfo.blogNums < 0 ? 0 : state.Info.userInfo.blogNums;
-        }
-    },
-    plugins: [
-        // 使用持久化状态插件
-        createPersistedState({
-            storage: window.localStorage, // 默认使用 localStorage，可以改为 sessionStorage
-        }),
-    ],
-})
+//         removeBlogByBlogId(state, id) {
+//             const index = state.Info.blogs.findIndex(blog => blog.id === id);
+//             if (index !== -1) {
+//                 state.Info.blogs.splice(index, 1);  // 删除该元素
+//             }
+//             state.Info.userInfo.blogNums -= 1;
+//             state.Info.userInfo.blogNums < 0 ? 0 : state.Info.userInfo.blogNums;
+//         }
+//     },
+//     plugins: [
+//         // 使用持久化状态插件
+//         createPersistedState({
+//             storage: window.localStorage, // 默认使用 localStorage，可以改为 sessionStorage
+//         }),
+//     ],
+// })
 
 // 创建 Vue 应用实例
 const app = createApp(App);

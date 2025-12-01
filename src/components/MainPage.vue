@@ -87,177 +87,153 @@
     </div>
 </template>
 
-<script>
-import { Search } from '@element-plus/icons-vue';
+<script setup>
 import { ElNotification } from 'element-plus';
+import { ref, onMounted, computed, reactive } from 'vue';
+import { useStore } from 'vuex';
+import http from '@/utils/http';
+import { useRouter } from 'vue-router';
 
-export default {
-    name: 'MainPage',
-    components: {
-        Search
+
+
+const store = useStore();
+const router = useRouter();
+
+const isTableError = ref(false);
+const tableData = ref([
+    {
+        pdf_id: "1",
+        uploader_id: "12323",
+        file_name: "TEST",
+        description: "描述 1",
+        course_name: "jed101",
+        file_size: 0,
+        likes: 0,
+        upload_time: "2024-06-01 12:00:00",
+        file_path: "./sda",
+        state: "approved"
     },
-    data() {
-        return {
-            isTableError: false,
-            tableData: [
-                {
-                    pdf_id: "1",
-                    uploader_id: "12323",
-                    file_name: "TEST",
-                    description: "描述 1",
-                    course_name: "jed101",
-                    file_size: 0,
-                    likes: 0,
-                    upload_time: "2024-06-01 12:00:00",
-                    file_path: "./sda",
-                    state: "approved"
-                },
-            ],
-            errorTableData: [
-                {
-                    pdf_id: "__ERROR__",
-                    uploader_id: "12323",
-                    file_name: "ERROR",
-                    description: "描述 1",
-                    course_name: "jed101",
-                    file_size: 0,
-                    likes: 0,
-                    upload_time: "2024-06-01 12:00:00",
-                    file_path: "./sda",
-                    state: "approved"
-                },
-            ],
-            searchQuery: '',
-            likes_pdf: [],
-            hotAuthors: [
-                { id: 1, rank: 1, name: '作家A' },
-                { id: 2, rank: 2, name: '作家B' },
-                { id: 3, rank: 3, name: '作家C' },
-                { id: 4, rank: 4, name: '作家D' },
-                { id: 5, rank: 5, name: '作家E' },
-            ],
-            hotCourses: [
-                { id: 1, rank: 1, title: 'Vue 3 入门到精通' },
-                { id: 2, rank: 2, title: '现代 CSS 布局' },
-                { id: 3, rank: 3, title: 'JavaScript 设计模式' },
-                { id: 4, rank: 4, title: 'Node.js 全栈开发' },
-                { id: 5, rank: 5, title: '数据结构与算法' },
-            ]
-        };
+]);
+const errorTableData = ref([
+    {
+        pdf_id: "__ERROR__",
+        uploader_id: "12323",
+        file_name: "ERROR",
+        description: "描述 1",
+        course_name: "jed101",
+        file_size: 0,
+        likes: 0,
+        upload_time: "2024-06-01 12:00:00",
+        file_path: "./sda",
+        state: "approved"
     },
-    computed: {
-        pdfWordCloud() {
-            return this.$store.state.wordCloudPdfnames;
+]);
+const searchQuery = ref('');
+const likes_pdf = ref([]);
+const hotAuthors = ref([
+    { id: 1, rank: 1, name: '作家A' },
+    { id: 2, rank: 2, name: '作家B' },
+    { id: 3, rank: 3, name: '作家C' },
+    { id: 4, rank: 4, name: '作家D' },
+    { id: 5, rank: 5, name: '作家E' },
+]);
+const hotCourses = ref([
+    { id: 1, rank: 1, title: 'Vue 3 入门到精通' },
+    { id: 2, rank: 2, title: '现代 CSS 布局' },
+    { id: 3, rank: 3, title: 'JavaScript 设计模式' },
+    { id: 4, rank: 4, title: 'Node.js 全栈开发' },
+    { id: 5, rank: 5, title: '数据结构与算法' },
+]);
+
+const pdfWordCloud = computed(() => {
+    return store.state.wordCloudPdfnames;
+})
+
+const fetchLikePdfs = async () => {
+    try {
+        const response = await http.post("/http/api/user/like-pdfs/", { "likes_pdf_id": store.state.userInfo.likes_pdf_id });
+        if (response.status === 200) {
+            likes_pdf.value = response.data.likes_pdf;
+            isTableError.value = false;
+        } else {
+            isTableError.value = true;
+            throw new Error('Failed to fetch liked PDFs');
         }
-    },
-    created() {
-        // 请求用户收藏的PDFs
-        this.$http.post("/http/api/user/like-pdfs/", { "likes_pdf_id": this.$store.state.userInfo.likes_pdf_id })
-            .then((response) => {
-                let httpStatus = response.status;
-                response = response.data;
-                if (httpStatus == 200) {
-                    this.likes_pdf = response.likes_pdf;
-                    this.isTableError = false;
-                } else {
-                    ElNotification({
-                        title: '错误',
-                        message: response.message || '发生未知错误',
-                        type: 'error',
-                        duration: 2000,
-                    })
-                    this.isTableError = true;
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-                ElNotification({
-                    title: '网络错误',
-                    message: '获取收藏PDF失败',
-                    type: 'error',
-                    duration: 2000,
-                })
-                this.isTableError = true;
-            });
-
-        // 请求词云数据
-        this.$http.get("/http/api/wordcloud-pdfnames/")
-            .then((response) => {
-                let httpStatus = response.status;
-                response = response.data;
-                if (httpStatus == 200) {
-                    this.$store.commit('updateWordCloudPdfnames', response.pdf_top_words);
-                } else {
-                    ElNotification({
-                        title: '错误',
-                        message: response.message || '发生未知错误',
-                        type: 'error',
-                        duration: 2000,
-                    })
-                    this.$store.commit('updateWordCloudPdfnames', ["ERROR", "错误", "请求失败", "请重试", "网络问题", "服务器", "异常", "联系管理员", "检查日志", "调试"]);
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-                ElNotification({
-                    title: '网络错误',
-                    message: '词云请求失败',
-                    type: 'error',
-                    duration: 2000,
-                })
-                this.$store.commit('updateWordCloudPdfnames', ["ERROR", "错误", "请求失败", "请重试", "网络问题", "服务器", "异常", "联系管理员", "检查日志", "调试"]);
-            })
-    },
-    methods: {
-        handelTableCellClick(row, column, cell, event) {
-            if (column.property === 'file_name') {
-                const pdfId = row.pdf_id;
-                // TODO:  设计请求跳转到 PDF 详情页
-                this.$router.push({ name: 'PdfViewPage', query: { pdfId: row.pdf_id } });
-            }
-        },
-        handleDelete(index, row) {
-            this.tableData.splice(index, 1);
-            // 请求数据库删除用户收藏
-            this.$http.post("/http/api/user/delete/like-pdf/", { "delete_like_pdf_id": row.pdf_id })
-                .then((response) => {
-
-                    let httpStatus = response.status;
-                    response = response.data;
-
-                    if (httpStatus == 200) {
-                        this.tableData.splice(index, 1); // 从表格数据中移除该行
-                    } else {
-                        ElNotification({
-                            title: '错误',
-                            message: response.message || '发生未知错误',
-                            type: 'error',
-                            duration: 2000,
-                        })
-
-                        this.tableData = this.errorTableData;
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                    ElNotification({
-                        title: '网络错误',
-                        message: '词云请求失败',
-                        type: 'error',
-                        duration: 2000,
-                    })
-                    this.tableData = this.errorTableData;
-                })
-        },
-        performSearch() {
-            if (!this.searchQuery.trim()) {
-                console.log('Search query is empty');
-                return;
-            }
-            console.log('Searching for:', this.searchQuery);
-        }
+    } catch (error) {
+        isTableError.value = true;
+        ElNotification({
+            title: '网络错误',
+            message: '获取收藏PDF失败',
+            type: 'error',
+            duration: 2000,
+        })
     }
 };
+
+const fetchWordCloudPdfNames = async () => {
+    try {
+        const response = await http.get("/http/api/wordcloud-pdfnames/");
+        if (response.status === 200) {
+            store.commit('updateWordCloudPdfnames', response.data.pdf_top_words);
+        } else {
+            throw new Error('Failed to fetch word cloud data');
+        }
+
+    } catch (error) {
+        store.commit('updateWordCloudPdfnames', ["ERROR", "错误", "请求失败", "请重试", "网络问题", "服务器", "异常", "联系管理员", "检查日志", "调试"]);
+        ElNotification({
+            title: '网络错误',
+            message: '获取词云数据失败',
+            type: 'error',
+            duration: 2000,
+        })
+    }
+};
+const handelTableCellClick = async (row, column, cell, event) => {
+    if (column.property === 'file_name') {
+        const pdfId = row.pdf_id;
+        // TODO:  设计请求跳转到 PDF 详情页
+        router.push({ name: 'PdfViewPage', query: { pdfId: row.pdf_id } });
+    }
+};
+
+const handleDelete = async (index, row) => {
+    try {
+        // 先让数据库删除，成功在删除本地的
+        const response = await http.post("/http/api/user/delete/like-pdf/", { "delete_like_pdf_id": row.pdf_id })
+
+        if (response.status === 200) {
+            tableData.value.splice(index, 1); // 从表格数据中移除该行
+        } else {
+            throw new Error('Failed to delete liked PDF');
+        }
+    } catch (error) {
+        tableData.value = errorTableData.value;
+        ElNotification({
+            title: '网络错误',
+            message: '取消收藏失败',
+            type: 'error',
+            duration: 2000,
+        })
+        return;
+    }
+};
+
+const performSearch = async () => {
+    if (!this.searchQuery.trim()) {
+        console.log('Search query is empty');
+        return;
+    }
+    console.log('Searching for:', this.searchQuery);
+};
+
+
+
+onMounted(async () => {
+    fetchLikePdfs();
+    fetchWordCloudPdfNames();
+});
+
 </script>
 
 <style scoped>

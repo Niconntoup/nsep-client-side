@@ -32,129 +32,96 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import CryptoJS from 'crypto-js';
 import { colProps, ElNotification } from 'element-plus';
 import { User, Lock } from '@element-plus/icons-vue';
+import http from '@/utils/http';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { ref, reactive, onMounted } from 'vue';
 
-export default {
-    name: "Login",
-    components: {
-        User,
-        Lock
-    },
-    data: function () {
-        return {
-            isLogin: false,
-            username: "",
-            password: "",
-            hashPassword: "",
-            Info: {
-                state: 200,
-                userInfo: {
-                    name: "",
-                    blogNums: 0,
-                    views: 0
-                },
-                blogs: [
-                    {
-                        id: 0,
-                        visible: true,
-                        title: "",
-                        contentHtml: "",
-                        tag: "",
-                        uploadTime: "",
-                        views: 0
-                    }
-                ]
-            }
-        }
-    },
-    methods: {
-        toggleForm() {
-            this.isLogin = !this.isLogin;
-            this.Info.userInfo.name = '';
-            this.password = '';
-        },
-        findUser() {
-            if (!this.username || !this.password) {
-                ElNotification({
-                    title: '警告',
-                    message: '账号或密码不能为空',
-                    type: 'warning',
-                });
-                return;
-            }
-            this.loginerUser(true); // Pass a flag to indicate it's a login attempt
-        },
+const store = useStore();
+const router = useRouter();
 
-        loginerUser(isLoginAttempt = false) {
-            if (!this.username || !this.password) {
-                ElNotification({
-                    title: '警告',
-                    message: '账号和密码不能为空',
-                    type: 'warning',
-                });
-                return;
-            }
-            this.hashPassword = CryptoJS.SHA256(this.password).toString(CryptoJS.enc.Base64);
+const isLogin = ref(false);
+const username = ref("");
+const password = ref("");
+const hashPassword = ref("");
 
+const toggleForm = async () => {
+    isLogin.value = !isLogin.value;
+    username.value = "";
+    password.value = "";
+};
+
+const findUser = async () => {
+    if (!username.value || !password.value) {
+        ElNotification({
+            title: '警告',
+            message: '账号或密码不能为空',
+            type: 'warning',
+        });
+        return;
+    }
+    loginerUser(true); // Pass a flag to indicate it's a login attempt
+};
+
+const loginerUser = async (isLoginAttempt = false) => {
+    if (!username.value || !password.value) {
+        ElNotification({
+            title: '警告',
+            message: '账号和密码不能为空',
+            type: 'warning',
+        });
+        return;
+    }
+
+    hashPassword.value = CryptoJS.SHA256(password.value).toString(CryptoJS.enc.Base64);
+
+    ElNotification({
+        title: '提示',
+        message: isLoginAttempt ? '正在登录...' : '正在注册...',
+        type: 'info',
+        duration: 1500,
+    });
+
+    vertifyOrRegisterUser(isLoginAttempt);
+};
+
+const vertifyOrRegisterUser = async (isLoginAttempt) => {
+    try {
+        const response = await http.post(`/http/${isLoginAttempt ? 'login' : 'register/user'}/`, { username: username.value, password: hashPassword.value });
+
+        if (response.status === 200 && response.data.token) {
             ElNotification({
-                title: '提示',
-                message: isLoginAttempt ? '正在登录...' : '正在注册...',
-                type: 'info',
-                duration: 1500,
+                title: '成功',
+                message: '登录成功',
+                type: 'success',
+                duration: 2000,
             });
 
-            this.$http.post(`/http/${isLoginAttempt ? 'login' : 'register/user'}/`, { username: this.username, password: this.hashPassword })
-                .then((response) => {
-                    let httpStatus = response.status;
-                    response = response.data;
+            localStorage.setItem('token', response.data.token);
+            http.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
-                    console.log("response.token:" + response.token);
-                    console.log("httpStatus:" + httpStatus);
+            // 将用户信息更新到 Vuex store
+            store.commit('updateUserInfo', response.data);
 
-                    if (httpStatus == 200 && response.token) { // 登录成功，并且返回了 token
-                        ElNotification({
-                            title: '成功',
-                            message: '登录成功',
-                            type: 'success',
-                            duration: 2000,
-                        });
+            // 跳转到主页
+            router.push("/main");
 
-                        // 1. 将 token 存储到 localStorage
-                        localStorage.setItem('token', response.token);
-
-                        // 2. 为后续的 axios 请求设置默认的 Authorization 头
-                        this.$http.defaults.headers.common['Authorization'] = `Bearer ${response.token}`;
-
-                        // (保留) 将用户信息更新到 Vuex store
-                        this.$store.commit('updateUserInfo', response);
-                        console.log("list:" + this.$store.state.userInfo.likes_pdf_id);
-                        // 3. 跳转到主页
-                        this.$router.push('/main');
-
-                    } else {
-                        ElNotification({
-                            title: '错误',
-                            message: response.message || '发生未知错误', // Use server message if available
-                            type: 'error',
-                            duration: 2000,
-                        })
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                    ElNotification({
-                        title: '网络错误',
-                        message: isLoginAttempt ? '登录失败' : '注册失败',
-                        type: 'error',
-                        duration: 2000,
-                    })
-                })
         }
+    } catch (error) {
+        ElNotification({
+            title: '错误',
+            message: '请求失败，请稍后重试',
+            type: 'error',
+        });
     }
-}
+};
+
+
+
 </script>
 
 <style>
