@@ -69,80 +69,111 @@
     </div>
 </template>
 
-<script setup>
+<script>
 import VuePdfApp from "vue3-pdf-app";
 import "vue3-pdf-app/dist/icons/main.css";
 import { ElNotification, ElRow, ElCol, ElIcon } from 'element-plus';
 import { CollectionTag, Timer, Document, Loading } from '@element-plus/icons-vue';
-import { ref, reactive, onMounted } from 'vue';
-import { useRoute } from "vue-router";
-import http from "@/utils/http";
 
-const route = useRoute();
+export default {
+    name: 'PdfViewPage',
+    components: {
+        VuePdfApp,
+        ElRow,
+        ElCol,
+        ElIcon,
+        CollectionTag,
+        Timer,
+        Document,
+        Loading
+    },
+    data() {
+        return {
+            pdfInfo: {
+                pdf_id: this.$route.query.pdfId || null, // 从路由初始化
+                // ... 其他字段会从API填充
+            },
+            annotationInfo: [],// 用于存储批注信息
+            pdf_file_content: null, // 用于存储 PDF 的二进制数据
+            pdf_page_number: 1,
+        };
+    },
+    created() {
+        if (this.pdfInfo.pdf_id) {
+            this.fetchPdfData();
+            this.getApprovedAnnoation();
 
-const pdfInfo = reactive({ "pdf_id": route.query.pdfId || null });
-const annotationInfo = ref([]); // 用于存储批注信息
-const pdf_file_content = ref(null); // 用于存储 PDF 的二进制数据
-const pdf_page_number = ref(1);
-
-const fetchPdfData = async () => {
-    const infoResponse = await http.post("/http/api/user/pdf-info/", { "pdf_id": pdfInfo.pdf_id });
-    if (infoResponse.status == 200) {
-        // pdfInfo = infoResponse.data.pdf_info;
-        Object.assign(pdfInfo, infoResponse.data.pdf_info);
-    } else {
-        ElNotification({
-            title: '错误',
-            message: errorMessage,
-            type: 'error',
-            duration: 3000,
-        });
-    }
-
-    const fileResponse = await http.get(`/http/api/pdf/download/${pdfInfo.pdf_id}`, {
-        // 无需手动设置 headers，axios 会使用默认值
-        responseType: 'blob' // 关键：告诉 axios 期望接收一个二进制大对象
-    });
-
-    // 将返回的 blob 数据转换为 VuePdfApp 可以使用的格式
-    pdf_file_content.value = await fileResponse.data.arrayBuffer();
-};
-
-const getApprovedAnnoation = async () => {
-    try {
-        const infoResponse = await http.post("/http/api/user/annotations/by-pdf-id-pagenumber/", { "pdf_id": pdfInfo.pdf_id, "pdf_page_number": pdf_page_number.value });
-
-        if (infoResponse.status !== 200) {
-            throw new Error(infoResponse.data.message || '获取Annoation信息失败');
+        } else {
+            ElNotification({
+                title: '错误',
+                message: '未提供 PDF ID',
+                type: 'error',
+                duration: 3000,
+            });
         }
+    },
+    methods: {
+        async fetchPdfData() {
+            try {
+                // --- 步骤 1: 获取 PDF 元数据 ---
+                // 注意: 您的 URL "/http/api/user/pdf-info/" 可能需要根据您的代理配置调整。
+                // 通常应该是 "/api/user/pdf-info/"。
+                const infoResponse = await this.$http.post("/http/api/user/pdf-info/", { "pdf_id": this.pdfInfo.pdf_id });
 
-        annotationInfo.value = infoResponse.data.annotations;
+                if (infoResponse.status !== 200) {
+                    throw new Error(infoResponse.data.message || '获取PDF信息失败');
+                }
 
-    } catch (error) {
-        console.error(error);
-        const errorMessage = error.response?.data?.message || error.message || '发生未知网络错误';
-        ElNotification({
-            title: '错误',
-            message: errorMessage,
-            type: 'error',
-            duration: 3000,
-        });
-    }
+                this.pdfInfo = infoResponse.data.pdf_info;
+
+                // --- 步骤 2: 获取 PDF 文件内容 ---
+                // 依赖 axios 的全局配置，它会自动添加 Authorization 头
+                const fileResponse = await this.$http.get(`/http/api/pdf/download/${this.pdfInfo.pdf_id}`, {
+                    // 无需手动设置 headers，axios 会使用默认值
+                    responseType: 'blob' // 关键：告诉 axios 期望接收一个二进制大对象
+                });
+
+                // 将返回的 blob 数据转换为 VuePdfApp 可以使用的格式
+                this.pdf_file_content = await fileResponse.data.arrayBuffer();
+
+
+            } catch (error) {
+                console.error(error);
+                const errorMessage = error.response?.data?.message || error.message || '发生未知网络错误';
+                ElNotification({
+                    title: '错误',
+                    message: errorMessage,
+                    type: 'error',
+                    duration: 3000,
+                });
+            }
+        },
+        async getApprovedAnnoation() {
+            try {
+                const infoResponse = await this.$http.post("/http/api/user/annotations/by-pdf-id-pagenumber/", { "pdf_id": this.pdfInfo.pdf_id, "pdf_page_number": this.pdf_page_number });
+
+                if (infoResponse.status !== 200) {
+                    throw new Error(infoResponse.data.message || '获取Annoation信息失败');
+                }
+
+                this.annotationInfo = infoResponse.data.annotations;
+
+            } catch (error) {
+                console.error(error);
+                const errorMessage = error.response?.data?.message || error.message || '发生未知网络错误';
+                ElNotification({
+                    title: '错误',
+                    message: errorMessage,
+                    type: 'error',
+                    duration: 3000,
+                });
+            }
+        },
+        onPdfLoaded() {
+            console.log('PDF 在查看器中加载完成');
+        },
+    },
 };
-onMounted(async () => {
-    if (pdfInfo.pdf_id) {
-        fetchPdfData();
-        getApprovedAnnoation();
-    } else {
-        ElNotification({
-            title: '错误',
-            message: '未提供 PDF ID',
-            type: 'error',
-            duration: 3000,
-        });
-    }
-});
-
 </script>
 
 <style scoped>
