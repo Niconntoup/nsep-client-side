@@ -1,0 +1,109 @@
+# 配置文件
+
+guide_tip:
+  annotation:
+    markdown_content: |
+      # 欢迎使用批注功能！
+
+      本系统支持两种强大的批注方式：**Markdown 文本** 和 **PDF 文件**。
+
+      ---
+
+      ### 1. 使用 Markdown 添加批注
+
+      您可以使用标准的 Markdown 语法来格式化您的文本，使其更具表现力。
+
+      #### 常用语法
+
+      *   **标题**: 使用 `#` 号，例如 `## 这是一个二级标题`
+      *   **加粗**: `**这是粗体文字**`
+      *   **斜体**: `*这是斜体文字*`
+      *   **列表**:
+          *   无序列表使用 `*` 或 `-`
+          *   有序列表使用 `1.` `2.`
+      *   注意：不能使用 HTML 标签。如<b>加粗</b>标签会被忽略。
+
+      #### 数学公式 (支持 LaTeX)
+
+      我们使用 MathJax 来渲染优美的数学公式。
+
+      **行内公式**: 将公式包裹在 `$` 符号中，例如质能方程 $E=mc^2$。
+
+      **块级公式**: 将公式包裹在 `$$` 符号中，它将居中显示。例如，麦克斯韦方程组：
+
+      $$
+      \nabla \cdot \mathbf{D} = \rho \\
+      \nabla \cdot \mathbf{B} = 0 \\
+      \nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t} \\
+      \nabla \times \mathbf{H} = \mathbf{J} + \frac{\partial \mathbf{D}}{\partial t}
+      $$
+
+      ---
+
+      ### 2. 添加 PDF 文件作为批注
+
+      除了文本，您还可以直接上传一个 PDF 文件作为批注。
+
+      *   点击“添加批注”按钮。
+      *   选择“PDF 批注”类型。
+      *   上传您的 PDF 文件。
+
+      这对于分享补充材料、论文草稿或包含复杂图表的反馈非常有用。
+
+      ---
+
+      ### 3. 进阶排版
+
+      #### 代码高亮
+      如果您需要插入代码，可以使用代码块：
+
+      ```python
+      # 这是一个 Python 代码示例
+      def factorial(n):
+          if n == 0: return 1
+          return n * factorial(n-1)
+      ```
+
+      #### 表格
+      Markdown 也支持简单的表格：
+
+      | 课程 | 学分 | 难度 |
+      | :--- | :---: | ---: |
+      | 高等数学 | 5.0 | ⭐⭐⭐⭐⭐ |
+      | 线性代数 | 4.0 | ⭐⭐⭐⭐ |
+
+      #### 引用文本
+      > 知识就是力量。 —— 培根
+
+      ### 4. 更多数学公式
+
+      **矩阵与行列式**:
+      $$
+      A = \begin{pmatrix}
+      a_{11} & a_{12} \\
+      a_{21} & a_{22}
+      \end{pmatrix}, \quad
+      |A| = a_{11}a_{22} - a_{12}a_{21}
+      $$
+
+      **极限与积分**:
+      $$
+      \lim_{x \to 0} \frac{\sin x}{x} = 1, \quad
+      \int_{-\infty}^{+\infty} e^{-x^2} dx = \sqrt{\pi}
+      $$
+
+      **分段函数**:
+      $$
+      f(x) = \begin{cases}
+      x^2 & x > 0 \\
+      0 & x = 0 \\
+      -x^2 & x < 0
+      \end{cases}
+      $$
+
+      ---
+
+      现在，开始您的第一次批注吧！
+
+      
+    pdf_path: "src/assets/guide/pdf_annotation_guide.pdf"

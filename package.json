@@ -15,7 +15,6 @@
     "markdown-it": "^14.1.0",
     "markdown-it-mathjax3": "^5.2.0",
     "mathjax": "^4.0.0",
-    "pdf-masterv": "^0.1.2",
     "vue": "^3.2.13",
     "vue-router": "^4.6.3",
     "vue3-pdf-app": "^1.0.3",
@@ -26,9 +25,11 @@
     "@babel/preset-typescript": "^7.28.5",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "json-loader": "^0.5.7",
     "sass": "^1.94.2",
     "sass-loader": "^16.0.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "yaml-loader": "^0.8.1"
   },
   "browserslist": [
     "> 1%",

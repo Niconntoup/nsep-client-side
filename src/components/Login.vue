@@ -109,7 +109,6 @@ const vertifyOrRegisterUser = async (isLoginAttempt) => {
 
             // 跳转到主页
             router.push("/main");
-
         }
     } catch (error) {
         ElNotification({

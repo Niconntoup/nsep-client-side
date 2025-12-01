@@ -192,7 +192,7 @@ const fetchWordCloudPdfNames = async () => {
 const handelTableCellClick = async (row, column, cell, event) => {
     if (column.property === 'file_name') {
         const pdfId = row.pdf_id;
-        // TODO:  设计请求跳转到 PDF 详情页
+        // 设计请求跳转到 PDF 详情页
         router.push({ name: 'PdfViewPage', query: { pdfId: row.pdf_id } });
     }
 };

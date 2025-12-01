@@ -10,17 +10,15 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import "@/assets/global.css";
 import _ from 'lodash';
 import store from "./store";
-import pdfMasterv from 'pdf-masterv'
-import 'pdf-masterv/lib/pdf-masterv.css'
+import AppConfig from "@/ymlconfig/config.yml";
 
-// 创建 Vue 应用实例
 const app = createApp(App);
 
 // 配置 axios
 // axios.defaults.baseURL = "http://127.0.0.1:5000"; // <--- 注释或删除此行
 
-// 将 axios 挂载到 Vue 3 的全局属性
 app.config.globalProperties.$http = axios;
+app.config.globalProperties.$config = AppConfig;
 
 // 注册图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -35,7 +33,6 @@ app.use(ElementPlus, {
 // 将 store 实例作为插件安装
 app.use(store);
 app.use(router);
-app.use(pdfMasterv);
 // 挂载应用
 app.mount("#app");
 
