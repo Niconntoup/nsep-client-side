@@ -1,7 +1,7 @@
 <template>
   <div id="app-container">
     <MainHeader v-if="!isLoginPage" />
-    <main class="content-area">
+    <main :class="['content-area', { 'no-top-padding': isLoginPage }]">
       <router-view></router-view>
     </main>
     <MainFooter v-if="!isLoginPage" />
@@ -26,7 +26,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 html,
 body {
   margin: 0;
@@ -53,5 +53,10 @@ body {
   /* Apply background color here */
   overflow: hidden;
   /* Prevent scrolling on the content area itself */
+}
+
+/* 当是登录页面时，去掉为 header 预留的顶部内边距 */
+.no-top-padding {
+  padding: 0 !important;
 }
 </style>

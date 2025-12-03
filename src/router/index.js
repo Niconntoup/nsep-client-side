@@ -7,6 +7,11 @@ const routes = [
         redirect: '/login'
     },
     {
+        path: '/__TEST__',
+        name: '__TEST__',
+        component: () => import('@/components/__TEST__.vue')
+    },
+    {
         path: '/login',
         name: 'Login',
         component: () => import('@/components/Login.vue')

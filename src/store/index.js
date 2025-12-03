@@ -1,5 +1,5 @@
 import { createStore } from 'vuex';
-import _ from 'lodash';
+import _, { update } from 'lodash';
 import createPersistedState from 'vuex-persistedstate'; // 1. 导入插件
 
 export default createStore({
@@ -10,52 +10,26 @@ export default createStore({
             username: "",
             create_time: "",
             permission: "",
-            likes_pdf_id: [],
-            likes_annotation_id: [],
-            favorited_pdf_id: [],
             token: ""
         },
-        wordCloudPdfnames: []
+        wordCloudPdfnames: [],
+        user_likes_pdf_id: [],
+        user_likes_annotation_id: [],
+        user_favorited_pdf_id: []
     },
     getters: {
 
     },
     mutations: {
-        updateUserLikesPdfId(state, operation_type, pdf_id) {
-            if (operation_type === "add") {
-                if (!state.userInfo.likes_pdf_id.includes(pdf_id)) {
-                    state.userInfo.likes_pdf_id.push(pdf_id);
-                }
-            } else if (operation_type === "remove") {
-                const index = state.userInfo.likes_pdf_id.indexOf(pdf_id);
-                if (index !== -1) {
-                    state.userInfo.likes_pdf_id.splice(index, 1);
-                }
-            }
+
+        updateUserLikesPdfId(state, likes_pdf_id) {
+            state.user_likes_pdf_id = likes_pdf_id;
         },
-        updateUserLikesAnnotationId(state, operation_type, annotation_id) {
-            if (operation_type === "add") {
-                if (!state.userInfo.likes_annotation_id.includes(annotation_id)) {
-                    state.userInfo.likes_annotation_id.push(annotation_id);
-                }
-            } else if (operation_type === "remove") {
-                const index = state.userInfo.likes_annotation_id.indexOf(annotation_id);
-                if (index !== -1) {
-                    state.userInfo.likes_annotation_id.splice(index, 1);
-                }
-            }
+        updateUserLikesAnnotationId(state, likes_annotation_id) {
+            state.user_likes_annotation_id = likes_annotation_id;
         },
-        updateUserFavoritedPdfId(state, operation_type, pdf_id) {
-            if (operation_type === "add") {
-                if (!state.userInfo.favorited_pdf_id.includes(pdf_id)) {
-                    state.userInfo.favorited_pdf_id.push(pdf_id);
-                }
-            } else if (operation_type === "remove") {
-                const index = state.userInfo.favorited_pdf_id.indexOf(pdf_id);
-                if (index !== -1) {
-                    state.userInfo.favorited_pdf_id.splice(index, 1);
-                }
-            }
+        updateUserFavoritedPdfId(state, favorited_pdf_id) {
+            state.user_favorited_pdf_id = favorited_pdf_id;
         },
         // 同步修改 state（必须同步）
         updateUserInfo(state, userInfo) {

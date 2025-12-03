@@ -3,7 +3,7 @@
         <div id="background-animation"></div>
         <div class="login-box">
             <div class="login-header">
-                <h2>NESP</h2>
+                <h2>{{ isLogin ? '注 册' : '登 录' }}</h2>
             </div>
             <div class="form-content">
                 <div class="input-wrapper">
@@ -107,6 +107,14 @@ const vertifyOrRegisterUser = async (isLoginAttempt) => {
             // 将用户信息更新到 Vuex store
             store.commit('updateUserInfo', response.data);
 
+            // 并行获取用户偏好数据
+            await Promise.all([
+                fetchUserLikesPdfId(),
+                fetchUserLikesAnnotationId(),
+                fetchUserFavoritedPdfId()
+            ]);
+
+
             // 跳转到主页
             router.push("/main");
         }
@@ -119,11 +127,65 @@ const vertifyOrRegisterUser = async (isLoginAttempt) => {
     }
 };
 
+const fetchUserLikesPdfId = async () => {
+    try {
+        const response = await http.post("/http/api/user/get/likes/", { "user_id": store.state.userInfo.user_id, "item_type": "pdf" });
+
+        if (response.status === 200 && response.data) {
+            store.commit('updateUserLikesPdfId', response.data.liked_items);
+        } else {
+            throw new Error("Failed to fetch user likes PDF IDs");
+        }
+    } catch (error) {
+        ElNotification({
+            title: '错误',
+            message: '获取用户喜欢的PDF列表失败',
+            type: 'error',
+        });
+    }
+};
+
+const fetchUserLikesAnnotationId = async () => {
+    try {
+        const response = await http.post("/http/api/user/get/likes/", { "user_id": store.state.userInfo.user_id, "item_type": "annotation" });
+
+        if (response.status === 200 && response.data) {
+            store.commit('updateUserLikesAnnotationId', response.data.liked_items);
+        } else {
+            throw new Error("Failed to fetch user likes annotation IDs");
+        }
+    } catch (error) {
+        ElNotification({
+            title: '错误',
+            message: '获取用户喜欢的注释列表失败',
+            type: 'error',
+        });
+    }
+};
+
+const fetchUserFavoritedPdfId = async () => {
+    try {
+        const response = await http.post("/http/api/user/get/favorites/", { "user_id": store.state.userInfo.user_id });
+
+        if (response.status === 200 && response.data) {
+            store.commit('updateUserFavoritedPdfId', response.data.favorited_pdf_id);
+        } else {
+            throw new Error("Failed to fetch user favorited PDF IDs");
+        }
+    } catch (error) {
+        ElNotification({
+            title: '错误',
+            message: '获取用户喜欢的注释列表失败',
+            type: 'error',
+        });
+    }
+};
+
 
 
 </script>
 
-<style>
+<style scoped>
 @keyframes gradient-animation {
     0% {
         background-position: 0% 50%;
@@ -144,7 +206,7 @@ const vertifyOrRegisterUser = async (isLoginAttempt) => {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background: linear-gradient(-45deg, #bfee52, #3cd3e7, #23a6d5, #23d5ab);
     background-size: 400% 400%;
     animation: gradient-animation 15s ease infinite;
     z-index: 0;
@@ -155,7 +217,7 @@ const vertifyOrRegisterUser = async (isLoginAttempt) => {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100dvh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     position: relative;
     overflow: hidden;
