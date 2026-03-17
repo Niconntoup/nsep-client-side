@@ -2,7 +2,7 @@
   <div class="main-page-container">
     <div class="page-content-wrapper">
       <!-- Left Column (Sticky) -->
-      <div class="left-column">
+      <!-- <div class="left-column">
         <el-card class="paper-card hot-list-card">
           <template #header>
             <div class="card-header">
@@ -10,39 +10,39 @@
             </div>
           </template>
 
-          <div class="tag-container">
-            <el-tag v-for="tag in pdfWordCloud" :key="tag" type="primary">{{ tag }}</el-tag>
-          </div>
-        </el-card>
+<div class="tag-container">
+  <el-tag v-for="tag in pdfWordCloud" :key="tag" type="primary">{{ tag }}</el-tag>
+</div>
+</el-card>
 
-        <el-card class="paper-card hot-list-card">
-          <template #header>
+<el-card class="paper-card hot-list-card">
+  <template #header>
             <div class="card-header">
               <span>🔥 上传贡献</span>
             </div>
           </template>
-          <ul>
-            <li v-for="author in hotAuthors" :key="author.id" class="hot-list-item">
-              <span class="rank-badge">{{ author.rank }}</span>
-              <span class="item-name">{{ author.name }}</span>
-            </li>
-          </ul>
-        </el-card>
+  <ul>
+    <li v-for="author in hotAuthors" :key="author.id" class="hot-list-item">
+      <span class="rank-badge">{{ author.rank }}</span>
+      <span class="item-name">{{ author.name }}</span>
+    </li>
+  </ul>
+</el-card>
 
-        <el-card class="paper-card hot-list-card">
-          <template #header>
+<el-card class="paper-card hot-list-card">
+  <template #header>
             <div class="card-header">
               <span>🎓 课程关联最多</span>
             </div>
           </template>
-          <ul>
-            <li v-for="course in hotCourses" :key="course.id" class="hot-list-item">
-              <span class="rank-badge">{{ course.rank }}</span>
-              <span class="item-name">{{ course.title }}</span>
-            </li>
-          </ul>
-        </el-card>
-      </div>
+  <ul>
+    <li v-for="course in hotCourses" :key="course.id" class="hot-list-item">
+      <span class="rank-badge">{{ course.rank }}</span>
+      <span class="item-name">{{ course.title }}</span>
+    </li>
+  </ul>
+</el-card>
+</div> -->
 
       <!-- Right Column (Scrollable) -->
       <div class="right-column">
@@ -106,7 +106,20 @@ const tableData = ref([
     uploader_id: "12323",
     file_name: "TEST",
     description: "描述 1",
-    course_name: "jed101",
+    course_name: "数学分析",
+    file_size: 0,
+    likes: 0,
+    upload_time: "2024-06-01 12:00:00",
+    file_path: "./sda",
+    state: "approved"
+  },
+
+  {
+    pdf_id: "1",
+    uploader_id: "12323",
+    file_name: "sadada",
+    description: "描述 2",
+    course_name: "线性代数",
     file_size: 0,
     likes: 0,
     upload_time: "2024-06-01 12:00:00",

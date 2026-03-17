@@ -27,7 +27,7 @@
             <el-table-column prop="likes" label="Likes" sortable />
             <el-table-column label="Operation">
               <template #default="scope">
-                <el-button type="primary" plain @click="handleDelete(scope.$index, scope.row)">
+                <el-button type="primary" plain @click="handleEdit(scope.$index, scope.row)">
                   编辑
                 </el-button>
                 <el-button type="danger" plain @click="handleDelete(scope.$index, scope.row)">
@@ -78,6 +78,13 @@ const tableData = ref([
   }
 ]);
 
+
+const handleEdit = (index, row) => {
+  console.log('Edit clicked for:', row);
+  // Implement edit functionality here
+
+  router.push("/profile/edit");
+};
 </script>
 
 <style scoped>

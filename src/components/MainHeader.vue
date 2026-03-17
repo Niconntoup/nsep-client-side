@@ -2,7 +2,11 @@
     <el-header class="main-header">
         <div class="header-left">
             <img src="@/assets/logo.png" alt="Logo" class="logo" />
-            <span class="site-name">Designed by Niconntoup</span>
+            <span class="site-name">NESP
+
+
+
+            </span>
         </div>
         <div class="header-center">
             <el-input v-model="searchQuery" placeholder="发现新内容..." class="header-search-input" size="large" min="50%"
@@ -22,7 +26,10 @@
                 <template #dropdown>
                     <el-dropdown-menu>
                         <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                        <el-dropdown-item command="normalManage">普通管理</el-dropdown-item>
+                        <el-dropdown-item command="superManage">超级管理</el-dropdown-item>
                         <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
@@ -57,6 +64,12 @@ export default {
                     // Handle logout logic here
                     console.log('User logged out');
                     this.$router.push('/login');
+                    break;
+                case 'normalManage':
+                    this.$router.push('/normal-manage');
+                    break;
+                case 'superManage':
+                    this.$router.push('/super-manage');
                     break;
             }
         },

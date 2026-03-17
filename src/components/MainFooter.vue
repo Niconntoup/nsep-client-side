@@ -2,7 +2,7 @@
     <el-footer class="main-footer">
         <div class="footer-content">
             <div class="designer-info">
-                <span>Designed by Niconntoup</span>
+                <span>NESP</span>
             </div>
             <div class="friendship-links">
                 <span>友情链接:</span>

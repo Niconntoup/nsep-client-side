@@ -29,9 +29,31 @@ const routes = [
     {
         // 有query参数{pdfId: 'xxx'}，用于获取PDF详情
         path: '/pdf/view',
+
+
         name: 'PdfViewPage',
         component: () => import('@/components/PdfViewPage.vue')
     },
+    {
+        path: '/profile/edit',
+        name: 'ProfileEditPage',
+        component: () => import('@/components/PublishPdf.vue')
+    },
+    {
+        path: '/normal-manage',
+        name: 'ReviewerPage',
+        component: () => import('@/components/ReviewerPage.vue')
+    },
+    {
+        path: '/pdf-manage',
+        name: 'PdfManagePage',
+        component: () => import('@/components/PdfManagePage.vue')
+    },
+    {
+        path: '/super-manage',
+        name: 'AdminPage',
+        component: () => import('@/components/AdminPage.vue')
+    }
 ];
 
 
